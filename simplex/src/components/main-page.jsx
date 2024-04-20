@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Main-page.css'
 
 function Prueba() {
@@ -29,6 +29,19 @@ function Restrictions(params){
 
     const [objetive, setVariables] = useState([]);
     const [restric, setRestrictions] = useState([]);
+    const [restrictionTypes, setRestrictionTypes] = useState([]);
+
+    useEffect(() => {
+        if (restrictions > 0) {
+            setRestrictionTypes(prev => {
+                const numRestrictions = Number(restrictions);
+                if (prev.length !== numRestrictions) {
+                    return Array(numRestrictions).fill('<=');
+                }
+                return prev;
+            });
+        }
+    }, [restrictions]);
 
     const handleVariables = (index, event) => {
         const newVariables = [...objetive];
@@ -41,14 +54,28 @@ function Restrictions(params){
         if (newRestrictions[i] === undefined) {
             newRestrictions[i] = [];
         }
-        console.log("j: ", j);
         newRestrictions[i][j] = event.target.value;
         setRestrictions(newRestrictions);
     }
 
+    const handleRestrictionValue = (i, e) => {
+        let newRestrictions = [...restric]; // Copia el estado actual
+        if (newRestrictions[i] === undefined) {
+            newRestrictions[i] = [];
+        }
+        newRestrictions[i][variables] = e.target.value; // Agrega el valor después del símbolo menor que al final del array de restricciones
+        setRestrictions(newRestrictions); // Actualiza el estado
+    }
+
+    const handleRestrictionType = (i, e) => {
+        let newRestrictionTypes = [...restrictionTypes]; // Copia el estado actual
+        newRestrictionTypes[i] = e.target.value; // Actualiza el tipo de restricción
+        setRestrictionTypes(newRestrictionTypes); // Actualiza el estado
+    }
+
     return(
         <div>
-            {variables != 0 && (
+            {variables > 0 && (
                 <>
                     <p>Función objetivo:</p>
                     <div className='restrictions'>
@@ -76,39 +103,43 @@ function Restrictions(params){
                 </>
                 
             )}
-            {variables != 0 && restrictions != 0 &&(
-                <>
-                    <p>Restricciones:</p>
-                    {(() => {
-                        const restric = [];
-                        let variab = [];
-                        for(let i = 0; i < restrictions; i++){
-                            for (let j = 0; j < variables; j++) {
-                                if(j+1 != variables){
-                                    variab.push(<div className='variables' key={"x"+(j+1)+i}>
-                                        <input type='number' onChange={(e) => handleRestrictions(i, j, e)}></input>
-                                        <p> x{j+1} </p>
-                                        <p> + </p>
-                                    </div>);
-                                }
-                                else{
-                                    variab.push(<div className='variables' key={"x"+(j+1)+i}>
-                                        <input type='number' onChange={(e) => handleRestrictions(i, j, e)}></input>
-                                        <p> x{j+1} </p>
-                                        <p> {'<='} </p>
-                                        <input type='number' onChange={(e) => handleRestrictions(i, j, e)}></input>
-                                    </div>);
-                                }
-                            }
-                            restric.push(<div className='restrictions' key={i}>{variab}</div>);
-                            variab = [];
+            {variables > 0 && restrictions > 0 &&(
+    <>
+        <p>Restricciones:</p>
+            {(() => {
+                let restric = [];
+                let variab = [];
+                for(let i = 0; i < restrictions; i++){
+                    for (let j = 0; j < variables; j++) {
+                        if(j+1 != variables){
+                            variab.push(<div className='variables' key={"x"+(j+1)+i}>
+                                <input type='number' onChange={(e) => handleRestrictions(i, j, e)}></input>
+                                <p> x{j+1} </p>
+                                <p> + </p>
+                            </div>);
                         }
-                        return restric;
-                    })()}
-                    <button onClick={() => {console.log(restric)}}>Imprimir restric</button>
-                </>
-            )}
-        </div>
+                        else{
+                            variab.push(<div className='variables' key={"x"+(j+1)+i}>
+                                <input type='number' onChange={(e) => handleRestrictions(i, j, e)}></input>
+                                <p> x{j+1} </p>
+                                <select value={restrictionTypes[i]} onChange={(e) => handleRestrictionType(i, e)}>
+                                    <option value="<=">{'<='}</option>
+                                    <option value=">=">{'>='}</option>
+                                    <option value="=">{'='}</option>
+                                </select>
+                                <input type='number' onChange={(e) => handleRestrictionValue(i, e)}></input>
+                            </div>);
+                        }
+                    }
+                    restric.push(<div className='restrictions' key={i}>{variab}</div>);
+                    variab = [];
+                }
+                return restric;
+            })()}
+            <button onClick={() => {console.log(restric); console.log(restrictionTypes);}}>Imprimir restric</button>
+        </>
+    )}
+</div>
     );
 }
 

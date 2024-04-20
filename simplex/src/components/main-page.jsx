@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
 import './Main-page.css'
+import { useNavigate } from 'react-router-dom';
 
 function Prueba() {
     const [variables, setVariables] = useState(0);
     const [restrictions, setRestrictions] = useState(0);
-
-    /*const handleButtonClick = () => {
-        console.log(variables);
-        console.log(restrictions);
-    }*/
 
     return (
         <>
@@ -17,7 +13,6 @@ function Prueba() {
             <input type="text" value={variables} onChange={e => setVariables(e.target.value)} />
             <p>Ingrese la cantidad de restricciones</p>
             <input type="text" value={restrictions} onChange={e => setRestrictions(e.target.value)} />
-            {/*<button onClick={handleButtonClick}>Enviar</button>*/}
             <Restrictions variables={variables} restrictions ={restrictions} />
         </>
     );
@@ -27,9 +22,12 @@ function Restrictions(params){
     const variables = params.variables;
     const restrictions = params.restrictions;
 
-    const [objetive, setVariables] = useState([]);
+    const [objective, setObjective] = useState([]);
     const [restric, setRestrictions] = useState([]);
     const [restrictionTypes, setRestrictionTypes] = useState([]);
+    const [selection, setSelection] = useState('max'); // Nuevo estado para guardar la selección de la función objetivo
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (restrictions > 0) {
@@ -43,40 +41,110 @@ function Restrictions(params){
         }
     }, [restrictions]);
 
-    const handleVariables = (index, event) => {
-        const newVariables = [...objetive];
-        newVariables[index] = event.target.value;
-        setVariables(newVariables);
-    };
 
+    const handleVariables = (index, event) => {
+        const newVariables = [...objective];
+        newVariables[index] = parseInt(event.target.value, 10); // Convierte el valor a entero
+        setObjective(newVariables);
+    };
+    
     const handleRestrictions = (i, j, event) => {
         const newRestrictions = [...restric];
         if (newRestrictions[i] === undefined) {
             newRestrictions[i] = [];
         }
-        newRestrictions[i][j] = event.target.value;
+        newRestrictions[i][j] = parseInt(event.target.value, 10); // Convierte el valor a entero
         setRestrictions(newRestrictions);
     }
-
+    
     const handleRestrictionValue = (i, e) => {
         let newRestrictions = [...restric]; // Copia el estado actual
         if (newRestrictions[i] === undefined) {
             newRestrictions[i] = [];
         }
-        newRestrictions[i][variables] = e.target.value; // Agrega el valor después del símbolo menor que al final del array de restricciones
+        newRestrictions[i][variables] = parseInt(e.target.value, 10); // Convierte el valor a entero y lo agrega después del símbolo menor que al final del array de restricciones
         setRestrictions(newRestrictions); // Actualiza el estado
     }
 
-    const handleRestrictionType = (i, e) => {
-        let newRestrictionTypes = [...restrictionTypes]; // Copia el estado actual
-        newRestrictionTypes[i] = e.target.value; // Actualiza el tipo de restricción
-        setRestrictionTypes(newRestrictionTypes); // Actualiza el estado
+    const handleRestrictionType = (index, event) => {
+        let newRestrictionTypes = [...restrictionTypes];
+        newRestrictionTypes[index] = event.target.value;
+        setRestrictionTypes(newRestrictionTypes);
+    }
+
+    const addVariables = (index, newRestrictions, cantVariab) => {
+        for(let i = 0; i < newRestrictions.length; i++){
+            if(i != index){
+                newRestrictions[i].splice(cantVariab, 0, 0);
+            }
+        }
+    }
+
+    const setFinalRestrictions = () => {
+        let newRestrictions = [...restric];
+
+        for (let index = 0; index < restrictionTypes.length; index++) {
+            let cantVariab = newRestrictions[index].length - 1;
+            switch (restrictionTypes[index]) {
+                case '<=':
+                    // Agregar variable de holgura sumando
+                    newRestrictions[index].splice(cantVariab, 0, 1); 
+                    addVariables(index, newRestrictions, cantVariab);
+                    break;
+                case '>=':
+                    // Agregar variable de holgura restando
+                    newRestrictions[index].splice(cantVariab, 0, -1); 
+                    //cantVariabTot++;
+                    // Agregar variable artificial sumando
+                    newRestrictions[index].splice(cantVariab + 1, 0, 1); 
+                    addVariables(index, newRestrictions, cantVariab);
+                    addVariables(index, newRestrictions, cantVariab + 1);
+                    break;
+                case '=':
+                    // Agregar variable artificial sumando
+                    newRestrictions[index].splice(cantVariab, 0, 1); 
+                    addVariables(index, newRestrictions, cantVariab);
+                    break;
+                default:
+                    break;
+            }
+        }
+        setRestrictions(newRestrictions);
+    }
+
+    const setFinalObjective = () => {
+        let newObjective = [...objective];
+        let additionalLength = restric[0].length - newObjective.length;
+
+        if (additionalLength > 0) {
+            newObjective = newObjective.concat(new Array(additionalLength).fill(0));
+        }
+
+        if (selection === 'max') {
+            newObjective = newObjective.map(num => num !== 0 ? num * -1 : num);
+        }
+
+        setObjective(newObjective);
+        return newObjective; 
+    }
+
+    const startSimplex = () => {
+        setFinalRestrictions();
+        let newObjective = setFinalObjective(); 
+
+        let matrix = [newObjective, ...restric]; 
+        
+        navigate('/iterations', {state: { matrix, selection }}); 
     }
 
     return(
         <div>
             {variables > 0 && (
                 <>
+                    <select value={selection} onChange={e => setSelection(e.target.value)}>
+                        <option value="max">Maximizar</option>
+                        <option value="min">Minimizar</option>
+                    </select>
                     <p>Función objetivo:</p>
                     <div className='restrictions'>
                         {(() => {
@@ -99,7 +167,7 @@ function Restrictions(params){
                             return variab;
                         })()}
                     </div>
-                    <button onClick={() => {console.log(objetive)}}>Imprimir objective</button>
+                    <button onClick={() => {console.log(objective)}}>Imprimir objective</button>
                 </>
                 
             )}
@@ -137,10 +205,12 @@ function Restrictions(params){
                 return restric;
             })()}
             <button onClick={() => {console.log(restric); console.log(restrictionTypes);}}>Imprimir restric</button>
+            <button onClick={() => startSimplex()}>Comenzar</button>
         </>
     )}
 </div>
     );
 }
+
 
 export {Prueba};

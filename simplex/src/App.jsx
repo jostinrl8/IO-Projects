@@ -1,8 +1,10 @@
 //import { useState } from 'react'
 /*import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'*/
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css'
 import {Prueba} from './components/main-page.jsx'
+import {BasicSimplex} from './components/iterations-page.jsx'
 
 
 function App() {
@@ -32,7 +34,12 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
       */}
-      <Prueba />
+      <Router>
+          <Routes>
+          <Route path="/" element={<Prueba />} />
+          <Route path="/iterations" element={<BasicSimplex />} />
+      </Routes>
+      </Router>
     </>
   )
 }

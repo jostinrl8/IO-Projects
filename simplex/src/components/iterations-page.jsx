@@ -1,16 +1,27 @@
 import { useLocation } from 'react-router-dom';
+import './Iterations-page.css';
+//import Fraction from 'fraction.js';
 
 export function BasicSimplex() {
     
     const location = useLocation();
     const matrix = location.state.matrix;
+    const variables = location.state.variables;
+    const SAvariables = location.state.SAvariables;
 
     const handleButtonClick = () => {
         console.log(matrix);
+        console.log("labels", SAvariables);
+        let labels, bvsLabels = tableLabels();
+        console.log(labels);
+        console.log("Estos son los verticales",bvsLabels);
 
-        const resultado = resolverSimplex(matrix);
-        console.log("Resultado:");
-        console.log(mostrarMatriz(resultado))
+
+
+        //const resultado = resolverSimplex(matrix);
+        //console.log("Resultado:");
+        //console.log(mostrarMatriz(resultado))
+        //mostrarMatriz(resultado);
     }
 
     // Función para calcular los radios y encontrar el radio mínimo
@@ -77,25 +88,78 @@ export function BasicSimplex() {
     // Función principal para resolver el problema
     const resolverSimplex = (matriz) => {
         while (hayVariablesNegativas(matriz)) {
-        const { minimo, indiceMinimo } = calcularRadiosYMinimo(matriz);
+        const { /*minimo,*/ indiceMinimo } = calcularRadiosYMinimo(matriz);
         hacerPivote(matriz, indiceMinimo + 1, matriz[0].indexOf(encontrarValorMasNegativo(matriz[0])));
         }
         return matriz;
     };
     
     // Ejemplo de uso
-    const matrizEjemplo = [
+    /*const matrizEjemplo = [
         [1, -5, -4, 0, 0, 0],
         [0, 2, -1, 1, 0, 4],
         [0, 5, 3, 0, 1, 15]
-    ];
+    ];*/
 
     const mostrarMatriz = (matriz) => {
         if (!matriz || matriz.length === 0 || matriz[0].length === 0) {
-        return 'Matriz inválida.';
+            return 'Matriz inválida.';
         }
-        return matriz.map(row => "[" + row.join(", ") + "]").join("\n");
+        //return matriz.map(row => "[" + row.join(", ") + "]").join("\n");
+
+        let labels = tableLabels();
+
+
+
+        return (
+            <table className='table'>
+                <tbody>
+                    <tr><th>i</th><th>BVS</th>{labels[0]}<th>RHS</th></tr>
+                    {matriz.map((row, i) => (
+                        <tr key={i}>
+                            <td>{i}</td>
+                            {labels[1][i]}
+                            {row.map((cell, j) => (
+                                <td key={j}>{cell}</td>
+                                //<td key={j}>{new Fraction(cell).toFraction(true)}</td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        );
     };
+
+    const tableLabels = () => {
+        const labels = [];
+        const bvsLabels = [];
+        
+        bvsLabels.push(<th key="z">z</th>);
+
+        for (let i = 1; i <= variables; i++) {
+            labels.push(<th key={"x"+(i)}>x{i}</th>);
+        }
+
+        let cont = variables;
+        for (let i = 0; i < SAvariables.length; i++) {
+            if (SAvariables[i] === 's' || SAvariables[i] === '-s') {
+                labels.push(<th key={"s"+(cont)}>s{cont}</th>);
+                if (SAvariables[i] === 's')
+                    bvsLabels.push(<th key={"s"+(cont)}>s{cont}</th>);
+                cont++;
+            }
+        }
+
+        for (let i = 0; i < SAvariables.length; i++) {
+            if (SAvariables[i] === 'a') {
+                labels.push(<th key={"a"+(cont)}>a{cont}</th>);
+                bvsLabels.push(<th key={"a"+(cont)}>a{cont}</th>);
+                cont++;
+            }
+        }
+
+        return [labels, bvsLabels];
+    }
 
     /*const resultado = resolverSimplex(matrizEjemplo);
     console.log("Resultado:");
@@ -104,7 +168,8 @@ export function BasicSimplex() {
     return (
         <div>
             <h1>Esto es BasicSimplex</h1>
-            <button onClick={handleButtonClick}>Imprimir matrix</button>
+            {<button onClick={handleButtonClick}>Imprimir matrix</button>}
+            {mostrarMatriz(resolverSimplex(matrix))}
         </div>
     );
 }

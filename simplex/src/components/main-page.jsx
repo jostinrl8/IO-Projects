@@ -72,44 +72,49 @@ function Restrictions(params){
         setRestrictionTypes(newRestrictionTypes);
     }
 
-    const addVariables = (index, newRestrictions, cantVariab) => {
+    const addVariables = (index, newRestrictions, pos) => {
         for(let i = 0; i < newRestrictions.length; i++){
             if(i != index){
-                newRestrictions[i].splice(cantVariab, 0, 0);
+                newRestrictions[i].splice(pos, 0, 0);
             }
         }
     }
 
     const setFinalRestrictions = () => {
         let newRestrictions = [...restric];
+        let SAvariables = [];
 
         for (let index = 0; index < restrictionTypes.length; index++) {
-            let cantVariab = newRestrictions[index].length - 1;
+            let pos = newRestrictions[index].length - 1;
             switch (restrictionTypes[index]) {
                 case '<=':
                     // Agregar variable de holgura sumando
-                    newRestrictions[index].splice(cantVariab, 0, 1); 
-                    addVariables(index, newRestrictions, cantVariab);
+                    newRestrictions[index].splice(pos, 0, 1); 
+                    SAvariables.push('s');
+                    addVariables(index, newRestrictions, pos);
                     break;
                 case '>=':
                     // Agregar variable de holgura restando
-                    newRestrictions[index].splice(cantVariab, 0, -1); 
-                    //cantVariabTot++;
+                    newRestrictions[index].splice(pos, 0, -1); 
+                    SAvariables.push('-s');
                     // Agregar variable artificial sumando
-                    newRestrictions[index].splice(cantVariab + 1, 0, 1); 
-                    addVariables(index, newRestrictions, cantVariab);
-                    addVariables(index, newRestrictions, cantVariab + 1);
+                    newRestrictions[index].splice(pos + 1, 0, 1);
+                    SAvariables.push('a'); 
+                    addVariables(index, newRestrictions, pos);
+                    addVariables(index, newRestrictions, pos + 1);
                     break;
                 case '=':
                     // Agregar variable artificial sumando
-                    newRestrictions[index].splice(cantVariab, 0, 1); 
-                    addVariables(index, newRestrictions, cantVariab);
+                    newRestrictions[index].splice(pos, 0, 1); 
+                    SAvariables.push('a');
+                    addVariables(index, newRestrictions, pos);
                     break;
                 default:
                     break;
             }
         }
         setRestrictions(newRestrictions);
+        return SAvariables;
     }
 
     const setFinalObjective = () => {
@@ -129,12 +134,13 @@ function Restrictions(params){
     }
 
     const startSimplex = () => {
-        setFinalRestrictions();
+        let SAvariables = setFinalRestrictions();
         let newObjective = setFinalObjective(); 
+        console.log("Estos son los labels: ", SAvariables);
 
         let matrix = [newObjective, ...restric]; 
         
-        navigate('/iterations', {state: { matrix, selection }}); 
+        navigate('/iterations', {state: { matrix, variables, SAvariables}}); 
     }
 
     return(

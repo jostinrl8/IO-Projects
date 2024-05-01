@@ -5,16 +5,17 @@ import { useNavigate } from 'react-router-dom';
 function Prueba() {
     const [variables, setVariables] = useState(0);
     const [restrictions, setRestrictions] = useState(0);
+    
 
     return (
-        <>
-            <h1>Método Simplex</h1>
-            <p>Ingrese la cantidad de variables</p>
-            <input type="text" value={variables} onChange={e => setVariables(e.target.value)} />
-            <p>Ingrese la cantidad de restricciones</p>
-            <input type="text" value={restrictions} onChange={e => setRestrictions(e.target.value)} />
-            <Restrictions variables={variables} restrictions ={restrictions} />
-        </>
+            <div className='principal'>
+                <h1>Método Simplex</h1>
+                <p>Ingrese la cantidad de variables:</p>
+                <input className='numberInput' type="number" value={variables} onChange={e => setVariables(e.target.value)} />
+                <p>Ingrese la cantidad de restricciones:</p>
+                <input className='numberInput' type="number" value={restrictions} onChange={e => setRestrictions(e.target.value)} />
+                <Restrictions variables={variables} restrictions ={restrictions} className="prueba"/>
+            </div>
     );
 }
 
@@ -25,7 +26,7 @@ function Restrictions(params){
     const [objective, setObjective] = useState([]);
     const [restric, setRestrictions] = useState([]);
     const [restrictionTypes, setRestrictionTypes] = useState([]);
-    const [selection, setSelection] = useState('max'); // Nuevo estado para guardar la selección de la función objetivo
+    const [selection, setSelection] = useState('max'); 
 
     const navigate = useNavigate();
 
@@ -144,9 +145,10 @@ function Restrictions(params){
     }
 
     return(
-        <div>
+        <div className='prueba'>
             {variables > 0 && (
                 <>
+                    <p>Objetivo:</p>
                     <select value={selection} onChange={e => setSelection(e.target.value)}>
                         <option value="max">Maximizar</option>
                         <option value="min">Minimizar</option>
@@ -158,27 +160,30 @@ function Restrictions(params){
                             for (let i = 0; i < variables; i++) {
                                 if(i+1 != variables){
                                     variab.push(<div className='variables' key={"x"+(i+1)}>
-                                        <input type='number' onChange={(e) => handleVariables(i, e)} ></input>
-                                        <p> x{i+1}</p>
+                                        <div className='inputs'>
+                                            <input type='number' onChange={(e) => handleVariables(i, e)} ></input>
+                                            <p>x{i+1}</p>
+                                        </div>
                                         <p> + </p>
                                     </div>);
                                 }
                                 else{
                                     variab.push(<div className='variables' key={"x"+(i+1)}>
-                                        <input type='number' onChange={(e) => handleVariables(i, e)} ></input>
-                                        <p> x{i+1} </p>
+                                        <div className='inputs'>
+                                            <input type='number' onChange={(e) => handleVariables(i, e)} ></input>
+                                            <p> x{i+1} </p>
+                                        </div>
                                     </div>);
                                 }
                             }
                             return variab;
                         })()}
                     </div>
-                    <button onClick={() => {console.log(objective)}}>Imprimir objective</button>
                 </>
                 
             )}
             {variables > 0 && restrictions > 0 &&(
-    <>
+        <>
         <p>Restricciones:</p>
             {(() => {
                 let restric = [];
@@ -187,21 +192,25 @@ function Restrictions(params){
                     for (let j = 0; j < variables; j++) {
                         if(j+1 != variables){
                             variab.push(<div className='variables' key={"x"+(j+1)+i}>
-                                <input type='number' onChange={(e) => handleRestrictions(i, j, e)}></input>
-                                <p> x{j+1} </p>
+                                <div className='inputs'>
+                                    <input type='number' onChange={(e) => handleRestrictions(i, j, e)}></input>
+                                    <p> x{j+1} </p>
+                                </div>
                                 <p> + </p>
                             </div>);
                         }
                         else{
                             variab.push(<div className='variables' key={"x"+(j+1)+i}>
-                                <input type='number' onChange={(e) => handleRestrictions(i, j, e)}></input>
-                                <p> x{j+1} </p>
-                                <select value={restrictionTypes[i]} onChange={(e) => handleRestrictionType(i, e)}>
+                                <div className='inputs'>
+                                    <input type='number' onChange={(e) => handleRestrictions(i, j, e)}></input>
+                                    <p> x{j+1} </p>
+                                </div>
+                                <select className='resSelect' value={restrictionTypes[i]} onChange={(e) => handleRestrictionType(i, e)}>
                                     <option value="<=">{'<='}</option>
                                     <option value=">=">{'>='}</option>
                                     <option value="=">{'='}</option>
                                 </select>
-                                <input type='number' onChange={(e) => handleRestrictionValue(i, e)}></input>
+                                <input className='numberInput' type='number' onChange={(e) => handleRestrictionValue(i, e)}></input>
                             </div>);
                         }
                     }
@@ -210,8 +219,7 @@ function Restrictions(params){
                 }
                 return restric;
             })()}
-            <button onClick={() => {console.log(restric); console.log(restrictionTypes);}}>Imprimir restric</button>
-            <button onClick={() => startSimplex()}>Comenzar</button>
+            <button className='btn' onClick={() => startSimplex()}>Comenzar</button>
         </>
     )}
 </div>

@@ -139,9 +139,6 @@ export function BasicSimplex() {
 
     // Función para hacer que el pivote sea igual a 1 y establecer los demás números de esa columna en 0
     const hacerOperacionesFila = (matriz, indiceFilaPivote, indiceColumnaPivote) => {
-        console.log("iteracion: ", iteCont)
-        let copia = JSON.parse(JSON.stringify(matriz));
-        console.log("Matriz antes de la iteración: ", copia);
         const pivote = matriz[indiceFilaPivote][indiceColumnaPivote]; // Obtenemos el valor del pivote
 
         // Paso 1: Dividir la fila del pivote por el valor del pivote para hacer que el pivote sea igual a 1
@@ -392,12 +389,9 @@ export function BasicSimplex() {
                     return iter;
                 }
                 let iter = mostrarMatriz(matriz, radios);
-                console.log("finalBVS: ", finalBVS);
                 cambiarBVS(matriz, valorEntrante);
                 setIterations(prevMatrix => [...prevMatrix, iter]);
                 hacerOperacionesFila(matriz, indiceMinimo + 1, matriz[0].indexOf(encontrarValorMasNegativo(matriz[0])));
-                let copia = JSON.parse(JSON.stringify(matriz));
-                console.log("Matriz después de la iteración: ", copia);
                 setIterMatrix(prevMatrix => [...prevMatrix, matriz]);
                 return iter;
             }
@@ -420,7 +414,6 @@ export function BasicSimplex() {
         if (radios === -1) {
             setIsEndProcess(true);
             setIsError(true);
-            console.log("iterMatrix en no acotado: ", iterMatrix[iteCont-1]);
             return (
                 <div>
                     <h1>Problema no acotado</h1>
@@ -445,8 +438,6 @@ export function BasicSimplex() {
                 finalBVS[i] = <th key={k} className='normal'>{k}</th>;
             }
         }
-        console.log("finalBVS: ", finalBVS)
-        console.log("iterMatrix: ", iterMatrix[iteCont]);
         return (
             <table className='table'>
                 <tbody>
@@ -463,11 +454,20 @@ export function BasicSimplex() {
                             <tr key={i}>
                                 <td>{i}</td>
                                 {finalBVS[i]}
-                                {row.map((cell, j) => (
-                                    <td key={j}>{cell}</td>
-                                    //<td key={j}>{new Fraction(cell).toFraction(true)}</td>
-                                ))}
-                                {radios.length > 0 && <td>{radios[indiceRadio] === Infinity ? "+INF" : radios[indiceRadio]}</td>}
+                                {row.map((cell, j) => {
+                                    let cellValue = Number(cell);
+                                    cellValue = Number.isInteger(cellValue) ? cellValue : cellValue.toFixed(3);
+                                    return <td key={j}>{cellValue}</td>
+                                })}
+                                {radios.length > 0 && (
+                                    <td>
+                                        {radios[indiceRadio] === Infinity 
+                                        ? "+INF" 
+                                        : radios[indiceRadio] && !Number.isInteger(radios[indiceRadio]) 
+                                            ? radios[indiceRadio].toFixed(3) 
+                                            : radios[indiceRadio]}
+                                    </td>
+                                )}
                             </tr>
                         );
                     })}

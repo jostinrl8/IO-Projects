@@ -267,8 +267,12 @@ function Restrictions(params){
                                 </div>
                                 <select className='resSelect' value={restrictionTypes[i]} onChange={(e) => handleRestrictionType(i, e)}>
                                     <option value="<=">{'<='}</option>
-                                    <option value=">=">{'>='}</option>
-                                    <option value="=">{'='}</option>
+                                    {method !== 'comun' && (
+                                        <>
+                                            <option value=">=">{'>='}</option>
+                                            <option value="=">{'='}</option>
+                                        </>
+                                    )}
                                 </select>
                                 <input className='numberInput' type='number' onChange={(e) => handleRestrictionValue(i, e)}></input>
                             </div>);

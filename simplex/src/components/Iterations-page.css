@@ -57,8 +57,42 @@ tr:last-child th {
     background-color: #f1f1f1;
 }
 
-.principal .btn{
+.iteraciones .btn{
     margin-top: 50px;
 }
 
+.resultados{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
 
+.results{
+    width: fit-content;
+    margin-top: 0;
+}
+
+.buttons{
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.buttons button{
+    margin-top: 10px;
+}
+
+.buttons button:last-child{
+    color: white;
+    background-color: #166EFD;
+    margin-left: 10px;
+}
+
+.buttons button:last-child:hover{
+    background-color: #004bc4;
+}
+
+.buttons button:first-child:hover{
+    color: black;
+    background-color: #cbcbcb;
+}

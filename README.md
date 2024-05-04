@@ -1,7 +1,7 @@
-## Método Simplex 
-# Investigación de operaciones
+# Método Simplex 
+## Investigación de operaciones
 
-# Integrantes:
+## Integrantes:
 - Maria Paula Bolaños Apú - 2021026046
 - Jostin Retana Ledezma - 2021039736
 
